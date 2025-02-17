@@ -8,9 +8,9 @@ pipeline {
     stages {
         stage("DockerHub Connect") {
             steps {
-                withCredentials(usernamePassword(credentialsId: 'docker-hub-credential', 
-                                                 usernameVariable: 'DOCKER_USER', 
-                                                 passwordVariable: 'DOCKER_PASS')) {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credential', 
+                                                  usernameVariable: 'DOCKER_USER', 
+                                                  passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     '''
@@ -30,13 +30,10 @@ pipeline {
         
         stage('Push to Google Artifact Registry') {
             steps {
-               
-                    sh '''
-                    
-                    docker tag $IMAGE_NAME:${BUILD_NUMBER} ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
-                    docker push ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
-                    '''
-                
+                sh '''
+                docker tag $IMAGE_NAME:${BUILD_NUMBER} ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
+                docker push ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
+                '''
             }
         }
     }
