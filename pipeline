@@ -1,0 +1,46 @@
+pipeline{
+    agent any
+    environment {
+        IMAGE_NAME="python-okay"
+        ARTIFACT_REPO = "us-central1-docker.pkg.dev/mythic-inn-420620/my-docker-repo1"
+    }
+    stages{
+        stage (" dockerhub connect"){
+            step{
+                
+                   WithCredentials(usernamePassword([CredentialsId:'docker-hub',
+                   userVariable:DOCKER_USER,
+                   passwordVariable: DOCKER_PASS
+                   ])){
+                    sh'''
+
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                   }
+
+               
+            }
+        }
+        stage ("build image"){
+            step{
+                sh '''
+                
+                docker build -t $IMAGE_NAME:${BUILD_NUMBER} .
+                docker tag $IMAGE_NAME:${BUILD_NUMBER} ganesh6498/$IMAGE:${DUILD_NUMBER}
+                docker push  ganesh6498/$IMAGE:${DUILD_NUMBER}
+                '''
+            }
+        }
+        stage('push to doceketr hub')
+        {
+            step{
+                sh ''' 
+                    docker tag ${IMAGE_NAME:${BUILD_NUMBER} ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
+                   docker push  ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
+
+                '''
+            }
+        }
+      
+    }
+}
