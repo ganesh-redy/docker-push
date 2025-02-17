@@ -1,47 +1,43 @@
-pipeline{
+pipeline {
     agent any
     environment {
-        IMAGE_NAME="python-okay"
+        IMAGE_NAME = "python-okay"
         ARTIFACT_REPO = "us-central1-docker.pkg.dev/mythic-inn-420620/my-docker-repo1"
-         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-owner')
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-owner')
     }
-    stages{
-        stage (" dockerhub connect"){
-            step{
-                
-                   WithCredentials(usernamePassword([CredentialsId:'docker-hub',
-                   userVariable:DOCKER_USER,
-                   passwordVariable: DOCKER_PASS
-                   ])){
-                    sh'''
-
+    stages {
+        stage("DockerHub Connect") {
+            steps {
+                withCredentials(usernamePassword(credentialsId: 'docker-hub', 
+                                                 usernameVariable: 'DOCKER_USER', 
+                                                 passwordVariable: 'DOCKER_PASS')) {
+                    sh '''
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     '''
-                   }
-
-               
+                }
             }
         }
-        stage ("build image"){
-            step{
+        
+        stage("Build Image") {
+            steps {
                 sh '''
-                
                 docker build -t $IMAGE_NAME:${BUILD_NUMBER} .
-                docker tag $IMAGE_NAME:${BUILD_NUMBER} ganesh6498/$IMAGE:${DUILD_NUMBER}
-                docker push  ganesh6498/$IMAGE:${DUILD_NUMBER}
+                docker tag $IMAGE_NAME:${BUILD_NUMBER} ganesh6498/$IMAGE_NAME:${BUILD_NUMBER}
+                docker push ganesh6498/$IMAGE_NAME:${BUILD_NUMBER}
                 '''
             }
         }
-        stage('push to doceketr hub')
-        {
-            step{
-                sh ''' 
-                    docker tag ${IMAGE_NAME:${BUILD_NUMBER} ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
-                   docker push  ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
-
-                '''
+        
+        stage('Push to Google Artifact Registry') {
+            steps {
+                withCredentials([file(credentialsId: 'gcp-owner', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh '''
+                    
+                    docker tag $IMAGE_NAME:${BUILD_NUMBER} ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    docker push ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    '''
+                }
             }
         }
-      
     }
 }
