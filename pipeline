@@ -3,6 +3,7 @@ pipeline{
     environment {
         IMAGE_NAME="python-okay"
         ARTIFACT_REPO = "us-central1-docker.pkg.dev/mythic-inn-420620/my-docker-repo1"
+         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-owner')
     }
     stages{
         stage (" dockerhub connect"){
