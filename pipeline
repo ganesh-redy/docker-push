@@ -17,14 +17,16 @@ pipeline {
                 }
             }
         }
-           stage("Authenticate with Google Cloud") {
+
+        stage("Authenticate with Google Cloud") {
             steps {
                 sh '''
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                gcloud auth configure-docker ${REGION_GCP}-docker.pkg.dev
+                gcloud auth configure-docker us-central1-docker.pkg.dev
                 '''
             }
         }
+
         stage("Build Image") {
             steps {
                 sh '''
@@ -34,7 +36,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Push to Google Artifact Registry') {
             steps {
                 sh '''
