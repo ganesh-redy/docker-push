@@ -30,13 +30,13 @@ pipeline {
         
         stage('Push to Google Artifact Registry') {
             steps {
-                withCredentials([file(credentialsId: 'gcp-owner', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+               
                     sh '''
                     
                     docker tag $IMAGE_NAME:${BUILD_NUMBER} ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
                     docker push ${ARTIFACT_REPO}/${IMAGE_NAME}:${BUILD_NUMBER}
                     '''
-                }
+                
             }
         }
     }
